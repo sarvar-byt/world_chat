@@ -3,432 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat - Doimiy Kirish</title>
+    <title>World Chat + Stikerlar</title>
     <style>
-        /* --- CSS Dizayni --- */
+        /* --- CSS DIZAYNI --- */
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-body: #1a1c2c;
-            --bg-chat: #252836;
-            --msg-in: #323646;
-            --text-main: #ffffff;
-            --text-secondary: #aab2c0;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            --danger: #ff4757;
+            --primary: #6c5ce7;
+            --primary-dark: #5849be;
+            --bg-color: #dfe6e9;
+            --chat-bg: #ffffff;
+            --my-msg-bg: #6c5ce7;
+            --other-msg-bg: #f1f2f6;
+            --text-color: #2d3436;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            background-color: var(--bg-body);
-            background-image: radial-gradient(circle at 10% 20%, rgba(102, 126, 234, 0.2) 0%, transparent 20%),
-                              radial-gradient(circle at 90% 80%, rgba(118, 75, 162, 0.2) 0%, transparent 20%);
+            background-color: var(--bg-color);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
         }
 
-        .app-container {
+        .container {
             width: 100%;
-            max-width: 950px;
-            height: 92vh;
-            background-color: var(--bg-chat);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
+            max-width: 500px; /* Mobil o'lcham */
+            height: 100vh;
+            background-color: var(--chat-bg);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
-        }
-
-        /* Login Modal - Yashirilgan holatda display: none bo'ladi */
-        #login-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(37, 40, 54, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            display: none; /* Boshlang'ichda yashirin, JS orqali ochiladi */
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-card {
-            background: linear-gradient(145deg, #2e3242, #252836);
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            width: 90%;
-            max-width: 380px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-        }
-
-        .login-card h1 {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 15px;
-            background: #1a1c2c;
-            border: 2px solid #323646;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-        
-        .login-input:focus { border-color: #764ba2; }
-
-        .btn-glow {
-            background: var(--primary-gradient);
-            color: white; border: none;
-            width: 100%; padding: 15px;
-            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         /* Header */
         header {
-            padding: 15px 30px;
-            background: rgba(37, 40, 54, 0.8);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            background: var(--primary);
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
-        .user-badge {
-            background: rgba(255,255,255,0.1);
-            padding: 8px 16px; border-radius: 30px;
-            color: var(--text-secondary);
+        header h3 { font-size: 1.1rem; }
+
+        .btn-clear {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-clear:hover { background: rgba(255,255,255,0.3); }
+
+        /* Chat Window */
+        #chat-window {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 15px;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .message.my {
+            align-self: flex-end;
+            background-color: var(--my-msg-bg);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.other {
+            align-self: flex-start;
+            background-color: var(--other-msg-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-info {
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+            opacity: 0.7;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Stikerlar uchun stil */
+        .sticker-img {
+            width: 100px; /* Stikerni kattalashtirdim */
+            height: 100px;
+            object-fit: contain;
+            display: block;
+            margin-top: 5px;
         }
         
-        .user-badge strong { color: white; }
-
-        .btn-icon {
-            background: none; border: none;
-            color: var(--text-secondary);
-            font-size: 1.2rem; cursor: pointer;
-            margin-left: 15px; transition: 0.2s;
+        /* Agar stiker bo'lsa, matn qutisi joyini qisqartirish */
+        .message.sticker-msg {
+            background: transparent !important;
+            box-shadow: none;
+            padding: 0;
         }
-
-        .btn-icon.danger:hover { color: var(--danger); transform: scale(1.1); }
-        .btn-icon:hover { color: #ff6b6b; transform: scale(1.1); }
-
-        /* Chat Area */
-        #chat-area {
-            flex: 1; padding: 20px;
-            overflow-y: auto;
-            display: flex; flex-direction: column; gap: 12px;
-        }
-
-        #chat-area::-webkit-scrollbar { width: 6px; }
-        #chat-area::-webkit-scrollbar-thumb { background: #323646; border-radius: 10px; }
-
-        /* Messages */
-        .message-row { display: flex; width: 100%; }
-        .message-row.me { justify-content: flex-end; }
-        .message-row.other { justify-content: flex-start; }
-
-        .bubble {
-            max-width: 70%; padding: 10px 16px;
-            border-radius: 18px; position: relative;
-            color: white; font-size: 0.95rem;
-            word-wrap: break-word;
-        }
-
-        .bubble.me {
-            background: var(--primary-gradient);
-            border-radius: 18px 18px 4px 18px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .bubble.other {
-            background: var(--msg-in);
-            border-radius: 18px 18px 18px 4px;
-        }
-
-        .msg-info { font-size: 0.75rem; opacity: 0.7; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px;}
-        .bubble.me .msg-sender { color: rgba(255,255,255,0.9); }
-        .bubble.other .msg-sender { color: #aab2c0; }
-
-        /* Footer */
+        
+        /* Footer va Inputlar */
         footer {
-            padding: 15px 30px;
-            background: #252836;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex; gap: 10px; align-items: center;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
+        .emoji-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .emoji-btn:hover { transform: scale(1.2); }
 
         #msg-input {
-            flex: 1; padding: 12px 20px;
-            background: #1a1c2c; border: 1px solid #323646;
-            border-radius: 25px; color: white; outline: none;
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 1rem;
+        }
+        #msg-input:focus { border-color: var(--primary); }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Stiker Paneli */
+        #sticker-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: none; /* Yashirin holatda */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            z-index: 20;
+            border-top: 1px solid #eee;
+        }
+
+        .sticker-option {
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        .sticker-option:hover { transform: scale(1.1); }
+        .sticker-option img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Login Modal */
+        #login-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
         
-        #msg-input:focus { border-color: #667eea; }
-
-        .btn-send {
-            background: #1a1c2c; color: #667eea;
-            border: 1px solid #323646;
-            width: 45px; height: 45px;
-            border-radius: 50%; cursor: pointer;
-            font-size: 1.2rem; display: flex;
-            align-items: center; justify-content: center;
-            transition: 0.3s;
+        .login-content h1 { color: var(--primary); margin-bottom: 20px; }
+        .login-input {
+            padding: 10px; border: 2px solid #ddd; border-radius: 10px;
+            margin-bottom: 20px; font-size: 1.1rem; text-align: center; width: 200px;
         }
-        
-        .btn-send:hover { background: #667eea; color: white; }
-
-        .empty-placeholder {
-            text-align: center; color: #555; margin-top: 50px;
-        }
-
-        /* Delete Animation */
-        .delete-anim {
-            animation: scaleOut 0.3s forwards;
-        }
-
-        @keyframes scaleOut {
-            to { transform: scale(0); opacity: 0; margin: 0; padding: 0; }
+        .login-btn {
+            padding: 10px 30px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Login -->
-        <!-- CSSda display: none deb belgilangan, faqat foydalanuvchi bo‘lmasa ko‘rinadi -->
-        <div id="login-overlay">
-            <div class="login-card">
-                <h1>World Chat</h1>
-                <input type="text" id="username-field" class="login-input" placeholder="Ismingizni kiriting..." maxlength="10">
-                <button class="btn-glow" onclick="startChat()">Kirish 🚀</button>
+    <div class="container">
+        <!-- Login Modal -->
+        <div id="login-modal">
+            <div class="login-content">
+                <h1>Chat Ga Kirish</h1>
+                <input type="text" id="username" class="login-input" placeholder="Ismingiz..." maxlength="12">
+                <br>
+                <button class="login-btn" onclick="startChat()">Kirish 🚀</button>
             </div>
         </div>
 
         <!-- Header -->
         <header>
-            <div class="user-badge">
-                Siz: <strong id="display-name">Guest</strong>
-            </div>
-            <div>
-                <!-- Oxirgi xabarni o‘chirish -->
-                <button class="btn-icon" onclick="deleteMyLastMessage()" title="Oxirgi xabarni o‘chirish">
-                    🗑️
-                </button>
-                <!-- HAMMASINI O‘CHIRISH -->
-                <button class="btn-icon danger" onclick="deleteAllMyMessages()" title="Barcha xabarlarimni o‘chirish">
-                    ⚠️
-                </button>
-                <!-- CHIQISH TUGMASI -->
-                <button class="btn-icon" onclick="logout()" title="Hisobdan chiqish">
-                    🚪
-                </button>
-            </div>
+            <h3>Chat ✨</h3>
+            <button class="btn-clear" onclick="clearChat()">🗑️ Tozalash</button>
         </header>
 
-        <!-- Chat Area -->
-        <div id="chat-area"></div>
+        <!-- Chat Window -->
+        <div id="chat-window">
+            <!-- Xabarlar shu yerga keladi -->
+        </div>
+
+        <!-- Stiker Paneli -->
+        <div id="sticker-panel">
+            <!-- Stikerlar JS orqali yuklanadi -->
+        </div>
 
         <!-- Footer -->
         <footer>
+            <button class="emoji-btn" onclick="toggleStickers()">🙂</button>
             <input type="text" id="msg-input" placeholder="Xabar yozing..." autocomplete="off">
-            <button class="btn-send" onclick="sendMessage()">➤</button>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
         </footer>
     </div>
 
     <script>
-        // --- KOD ---
-        const chatArea = document.getElementById('chat-area');
+        // --- O‘ZGARUVCHILAR ---
+        const chatWindow = document.getElementById('chat-window');
         const msgInput = document.getElementById('msg-input');
-        const nameField = document.getElementById('username-field');
-        const displayName = document.getElementById('display-name');
-        const loginOverlay = document.getElementById('login-overlay');
+        const stickerPanel = document.getElementById('sticker-panel');
+        const loginModal = document.getElementById('login-modal');
+        const usernameInput = document.getElementById('username');
         
         let currentUser = '';
         let messages = [];
 
-        // --- 1. ILK YUKLANGANDA ISHLAYDIGAN FUNKSIYA ---
-        window.addEventListener('load', () => {
-            checkUserSession();
-        });
+        // STIKERLAR RO‘YXATI (Internetdagi bepul stikerlar linklari)
+        const stickers = [
+            "https://cdn-icons-png.flaticon.com/128/742/742751.png",  // Happy
+            "https://cdn-icons-png.flaticon.com/128/742/742928.png",  // Laugh
+            "https://cdn-icons-png.flaticon.com/128/1791/1791330.png", // Love
+            "https://cdn-icons-png.flaticon.com/128/478/478544.png",  // Sad
+            "https://cdn-icons-png.flaticon.com/128/1791/1791333.png", // Angry
+            "https://cdn-icons-png.flaticon.com/128/1039/1039868.png", // Cool
+            "https://cdn-icons-png.flaticon.com/128/744/744922.png",  // Thinking
+            "https://cdn-icons-png.flaticon.com/128/1067/1067566.png"  // Hello
+        ];
 
-        function checkUserSession() {
-            const savedUser = localStorage.getItem('wc_user');
+        // --- ASOSIY FUNKSIYALAR ---
+
+        // 1. Dastlabki yuklash
+        window.onload = function() {
+            loadStickers();
             
-            // AGAR USER MAVJUD BO'LSA, LOGIN KO'RSATMAYMIZ
+            // Userni tekshirish
+            const savedUser = localStorage.getItem('simple_chat_user');
             if (savedUser) {
                 currentUser = savedUser;
-                displayName.textContent = currentUser;
-                // Login oynasi yashirin (CSSda none)
-                loginOverlay.style.display = 'none';
-                // Xabalarni yuklaymiz
-                loadMessages();
-                msgInput.focus();
-            } else {
-                // AGAR USER YO'Q BO'LSA, LOGIN OYNASINI KO'RSATAMIZ
-                loginOverlay.style.display = 'flex';
+                loginModal.style.display = 'none';
             }
-        }
+            
+            loadMessages();
+        };
 
         // 2. Kirish (Login)
         function startChat() {
-            const name = nameField.value.trim();
-            if (!name) return alert("Ism kiritish shart!");
+            const name = usernameInput.value.trim();
+            if (name === '') return alert("Ism kiriting!");
             
             currentUser = name;
-            // Userni xotiraga yozamiz (KEYPOINT)
-            localStorage.setItem('wc_user', currentUser);
+            localStorage.setItem('simple_chat_user', currentUser);
             
-            // Oynani yopamiz
-            loginOverlay.style.display = 'none';
-            displayName.textContent = currentUser;
-            
-            loadMessages();
+            loginModal.style.display = 'none';
+            loadMessages(); // Xatlarni yuklash
             msgInput.focus();
         }
 
-        // 3. Yuborish
+        // 3. Stikerni panelga joylashtirish
+        function loadStickers() {
+            stickerPanel.innerHTML = '';
+            stickers.forEach(url => {
+                const div = document.createElement('div');
+                div.className = 'sticker-option';
+                div.innerHTML = `<img src="${url}" alt="sticker">`;
+                div.onclick = () => sendSticker(url);
+                stickerPanel.appendChild(div);
+            });
+        }
+
+        // 4. Stiker panelini ochish/yopish
+        function toggleStickers() {
+            if (stickerPanel.style.display === 'grid') {
+                stickerPanel.style.display = 'none';
+            } else {
+                stickerPanel.style.display = 'grid';
+            }
+        }
+
+        // 5. Xabar Yuborish (Matn)
         function sendMessage() {
             const text = msgInput.value.trim();
             if (!text) return;
 
             const msg = {
-                id: Date.now(),
+                type: 'text',
                 user: currentUser,
-                text: text,
-                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'}),
-                isMe: true
+                content: text,
+                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'})
             };
 
-            messages.push(msg);
-            saveAndRender(msg);
+            addMessageToStorage(msg);
+            renderMessage(msg);
             msgInput.value = '';
-            chatArea.scrollTop = chatArea.scrollHeight;
+            scrollToBottom();
         }
 
-        // 4. Saqlash va Chiqarish
-        function saveAndRender(newMsg = null) {
-            localStorage.setItem('wc_msgs', JSON.stringify(messages));
+        // 6. Stiker Yuborish
+        function sendSticker(url) {
+            const msg = {
+                type: 'sticker',
+                user: currentUser,
+                content: url,
+                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            addMessageToStorage(msg);
+            renderMessage(msg);
+            toggleStickers(); // Panelni yopish
+            scrollToBottom();
+        }
+
+        // 7. Xabarni xotiraga qo‘shish
+        function addMessageToStorage(msg) {
+            messages.push(msg);
+            // Faqat oxirgi 50 tasini saqlaymiz (xotirani tejash uchun)
+            if (messages.length > 50) messages.shift();
             
-            if (newMsg) {
-                const row = document.createElement('div');
-                row.className = 'message-row me'; 
-                row.id = `msg-${newMsg.id}`;
-                
-                row.innerHTML = `
-                    <div class="bubble me">
-                        <div class="msg-info">
-                            <span class="msg-sender">${escapeHtml(newMsg.user)}</span>
-                            <span>${newMsg.time}</span>
-                        </div>
-                        ${escapeHtml(newMsg.text)}
-                    </div>
-                `;
-                chatArea.appendChild(row);
-            }
+            localStorage.setItem('simple_chat_data', JSON.stringify(messages));
         }
 
-        // 5. YUKLASH
+        // 8. Xotiradan yuklash
         function loadMessages() {
-            const savedMsgs = localStorage.getItem('wc_msgs');
-            if (savedMsgs) {
-                messages = JSON.parse(savedMsgs);
-                chatArea.innerHTML = '';
-                
-                if (messages.length === 0) {
-                    chatArea.innerHTML = '<div class="empty-placeholder">Xabarlar yo‘q</div>';
-                } else {
-                    messages.forEach(msg => {
-                        const row = document.createElement('div');
-                        row.className = 'message-row me';
-                        row.id = `msg-${msg.id}`;
-                        row.innerHTML = `
-                            <div class="bubble me">
-                                <div class="msg-info">
-                                    <span class="msg-sender">${escapeHtml(msg.user)}</span>
-                                    <span>${msg.time}</span>
-                                </div>
-                                ${escapeHtml(msg.text)}
-                            </div>
-                        `;
-                        chatArea.appendChild(row);
-                    });
-                    chatArea.scrollTop = chatArea.scrollHeight;
-                }
+            const savedData = localStorage.getItem('simple_chat_data');
+            if (savedData) {
+                messages = JSON.parse(savedData);
+                chatWindow.innerHTML = ''; // Tozalash
+                messages.forEach(msg => renderMessage(msg));
+                scrollToBottom();
             }
         }
 
-        // 6. OXIRGI XABARNI O‘CHIRISH
-        function deleteMyLastMessage() {
-            if (messages.length === 0) return alert("Xabar yo‘q!");
+        // 9. Xabarni ekranda chiqarish
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            // Demoda hamma xabarlar 'my' (o'ng tomonda) ko'rinadi
+            div.className = `message my`;
 
-            for (let i = messages.length - 1; i >= 0; i--) {
-                if (messages[i].user === currentUser) {
-                    removeMessageAndRender(i);
-                    return;
-                }
+            if (msg.type === 'sticker') {
+                div.classList.add('sticker-msg');
+                div.innerHTML = `
+                    <div class="msg-info">
+                        <span>${escapeHtml(msg.user)}</span>
+                        <span>${msg.time}</span>
+                    </div>
+                    <img src="${msg.content}" class="sticker-img">
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="msg-info">
+                        <span>${escapeHtml(msg.user)}</span>
+                        <span>${msg.time}</span>
+                    </div>
+                    ${escapeHtml(msg.content)}
+                `;
             }
-            alert("Sizning xabaringiz yo‘q!");
+            chatWindow.appendChild(div);
         }
 
-        // 7. HAMMASINI O‘CHIRISH
-        function deleteAllMyMessages() {
-            if (messages.length === 0) return;
-
-            if (confirm("Haqiqatan ham o‘zingizning barcha xabalaringizni o‘chirmoqchimisiz?")) {
-                const originalCount = messages.length;
-                
-                // Faqat o'zidan bo'lmaganlarini qoldiramiz
-                messages = messages.filter(msg => msg.user !== currentUser);
-
-                if (messages.length === originalCount) {
-                    alert("O‘chirish uchun xabar topilmadi.");
-                } else {
-                    localStorage.setItem('wc_msgs', JSON.stringify(messages));
-                    loadMessages(); 
-                    alert("Barcha xabaringiz o‘chirildi.");
-                }
-            }
-        }
-
-        function removeMessageAndRender(index) {
-            const msg = messages[index];
-            messages.splice(index, 1);
-            localStorage.setItem('wc_msgs', JSON.stringify(messages));
-            
-            const el = document.getElementById(`msg-${msg.id}`);
-            if (el) {
-                el.classList.add('delete-anim');
-                setTimeout(() => el.remove(), 300);
+        // 10. Tarixni tozalash
+        function clearChat() {
+            if(confirm("Barcha xabarlarni o‘chirmoqchimisiz?")) {
+                messages = [];
+                localStorage.removeItem('simple_chat_data');
+                chatWindow.innerHTML = '';
             }
         }
 
-        // 8. CHIQISH (Log Out) - Bu kerak bo‘lsa, ismni o‘chiradi
-        function logout() {
-            if(confirm("Hisobdan chiqmoqchimisiz?")) {
-                localStorage.removeItem('wc_user');
-                location.reload();
-            }
+        function scrollToBottom() {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         }
 
-        // Event Listeners
-        msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
-        nameField.addEventListener('keypress', (e) => { if(e.key === 'Enter') startChat(); });
+        // Enter tugmasi
+        msgInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+        usernameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') startChat();
+        });
 
     </script>
 </body>
