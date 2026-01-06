@@ -19,20 +19,19 @@
             justify-content: center;
             align-items: center;
             font-family: 'Poppins', sans-serif;
-            overflow: hidden; /* Sahifa siljib ketmasligi uchun */
-            touch-action: none; /* Telefonda ortiqcha siljishni yo'qotadi */
+            overflow: hidden;
         }
 
-        /* Orqa fondagi shakllar */
-        .background { width: 100%; height: 100%; position: absolute; overflow: hidden; }
-        .shape { height: 250px; width: 250px; position: absolute; border-radius: 50%; z-index: 1; }
+        /* Orqa fondagi effektlar */
+        .background { width: 100%; height: 100%; position: absolute; overflow: hidden; z-index: 1; }
+        .shape { height: 250px; width: 250px; position: absolute; border-radius: 50%; }
         .shape:first-child { background: linear-gradient(#1845ad, #23a2f6); left: -50px; top: -50px; }
         .shape:last-child { background: linear-gradient(to right, #ff512f, #f09819); right: -50px; bottom: -50px; }
 
         .chat-container {
             width: 95%;
             max-width: 450px;
-            height: 90vh; /* Oynaning balandligi */
+            height: 85vh;
             background: rgba(255, 255, 255, 0.1);
             position: relative;
             backdrop-filter: blur(20px);
@@ -49,29 +48,19 @@
         header {
             padding: 15px;
             text-align: center;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         header h2 { font-size: 18px; margin: 0; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* CHAT CHIQADIGAN ASOSIY BLOK */
-        #chatbro_box { 
-            flex: 1; 
-            width: 100% !important;
-            height: 100% !important;
-            position: relative !important;
-        }
-
-        /* Chatbro ichidagi elementlarni majburan kengaytirish */
-        #chatbro_box iframe, .chatbro_container {
-            width: 100% !important;
-            height: 100% !important;
-            position: relative !important;
-            bottom: 0 !important;
-            right: 0 !important;
-            left: 0 !important;
-            top: 0 !important;
+        /* Chatbro Iframe usulida */
+        .chat-frame {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
         }
     </style>
 </head>
@@ -87,34 +76,13 @@
             <h2><i class="fas fa-satellite"></i> SAMIR LIVE</h2>
         </header>
 
-        <div id="chatbro_box"></div>
+        <iframe 
+            src="https://www.chatbro.com/59Adc" 
+            class="chat-frame"
+            allow="autoplay; encrypted-media" 
+            allowfullscreen>
+        </iframe>
     </div>
-
-    <script id="chatbroScript">
-        function ChatbroLoader(btns, onload) {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.async = true;
-            s.src = 'https://www.chatbro.com/embed.js';
-            s.onload = function() {
-                Chatbro.init({
-                    encodedChatId: "59Adc", 
-                    containerDivId: "chatbro_box",
-                    chatHeight: '100%',
-                    chatWidth: '100%',
-                    displayHeader: false,
-                    isAlwaysOpen: true,
-                    isFixed: false, // Burchakka yopishib qolmasligi uchun
-                    containerBackgroundColor: "transparent",
-                    inputBackgroundColor: "rgba(255,255,255,0.1)",
-                    messagesBackgroundColor: "transparent"
-                });
-            };
-            var x = document.getElementsByTagName('script')[0];
-            x.parentNode.insertBefore(s, x);
-        }
-        ChatbroLoader();
-    </script>
 
 </body>
 </html>
