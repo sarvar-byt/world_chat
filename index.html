@@ -3,59 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samir Stable Chat</title>
+    <title>Secret Room</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
-        body { margin: 0; background: #080710; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-        .chat-container {
-            width: 400px;
-            height: 85vh;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            position: relative;
+        body {
+            margin: 0; background: #050505; color: #00ff41;
+            font-family: 'Courier New', monospace; display: flex;
+            justify-content: center; align-items: center; height: 100vh;
         }
-        /* Chat yuklanguncha ko'rinadigan fon */
-        #chat_loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            z-index: 1;
+        .chat-box {
+            width: 90%; max-width: 400px; height: 80vh;
+            border: 1px solid #00ff41; display: flex; flex-direction: column;
+            background: rgba(0, 20, 0, 0.9); box-shadow: 0 0 20px #00ff41;
         }
-        #chat_area { width: 100%; height: 100%; position: relative; z-index: 10; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
+        .input-area { border-top: 1px solid #00ff41; display: flex; padding: 10px; }
+        input {
+            background: transparent; border: none; color: #00ff41;
+            flex: 1; outline: none; font-family: inherit;
+        }
+        button { background: transparent; border: 1px solid #00ff41; color: #00ff41; cursor: pointer; }
+        .status { padding: 5px; font-size: 10px; text-align: center; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div id="chat_loading">Yuklanmoqda...</div>
-    <div id="chat_area"></div>
+<div class="chat-box">
+    <div class="status" id="my-id-display">Sening ID: Yuklanmoqda...</div>
+    <div id="messages"></div>
+    
+    <div class="input-area" id="connection-area">
+        <input type="text" id="peer-id-input" placeholder="Sheriging ID sini yoz...">
+        <button onclick="connectToPeer()">ULANISH</button>
+    </div>
+
+    <div class="input-area" id="chat-area" style="display: none;">
+        <input type="text" id="msg-input" placeholder="Xabar yo'lla...">
+        <button onclick="sendMsg()">></button>
+    </div>
 </div>
 
 <script>
-    function loadChat() {
-        var s = document.createElement('script');
-        s.type = 'text/javascript';
-        s.async = true;
-        s.src = 'https://www.chatbro.com/embed.js';
-        s.onload = function() {
-            document.getElementById('chat_loading').style.display = 'none';
-            Chatbro.init({
-                encodedChatId: "59Adc",
-                containerDivId: "chat_area",
-                chatHeight: '100%',
-                chatWidth: '100%',
-                displayHeader: false,
-                isAlwaysOpen: true,
-                isFixed: false
-            });
-        };
-        document.body.appendChild(s);
+    const peer = new Peer();
+    let conn;
+
+    // Sening ID raqaming chiqqanda
+    peer.on('open', (id) => {
+        document.getElementById('my-id-display').innerText = "Sening ID: " + id;
+        console.log('My ID:', id);
+    });
+
+    // Senga kimdir ulanmoqchi bo'lsa
+    peer.on('connection', (c) => {
+        conn = c;
+        setupChat();
+    });
+
+    // Sherigingga ulanish funksiyasi
+    function connectToPeer() {
+        const peerId = document.getElementById('peer-id-input').value;
+        conn = peer.connect(peerId);
+        setupChat();
     }
-    window.onload = loadChat;
+
+    function setupChat() {
+        document.getElementById('connection-area').style.display = 'none';
+        document.getElementById('chat-area').style.display = 'flex';
+        
+        conn.on('open', () => {
+            addMessage("TIZIM: Bog'lanish o'rnatildi. Suhbat xavfsiz!");
+        });
+
+        conn.on('data', (data) => {
+            addMessage("SHERIGING: " + data);
+        });
+    }
+
+    function sendMsg() {
+        const msg = document.getElementById('msg-input').value;
+        if (msg && conn) {
+            conn.send(msg);
+            addMessage("SEN: " + msg);
+            document.getElementById('msg-input').value = '';
+        }
+    }
+
+    function addMessage(text) {
+        const div = document.createElement('div');
+        div.innerText = text;
+        document.getElementById('messages').appendChild(div);
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
 </script>
 
 </body>
