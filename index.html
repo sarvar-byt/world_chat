@@ -3,443 +3,665 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat + Stikerlar</title>
+    <title>Umumiy Chat - Online Muloqot</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- CSS DIZAYNI --- */
         :root {
-            --primary: #6c5ce7;
-            --primary-dark: #5849be;
-            --bg-color: #dfe6e9;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
             --chat-bg: #ffffff;
-            --my-msg-bg: #6c5ce7;
-            --other-msg-bg: #f1f2f6;
-            --text-color: #2d3436;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --message-sent-bg: #4f46e5;
+            --message-sent-text: #ffffff;
+            --message-received-bg: #f3f4f6;
+            --message-received-text: #1f2937;
+            --border-radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px; /* Mobil o'lcham */
-            height: 100vh;
-            background-color: var(--chat-bg);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        /* Header */
-        header {
-            padding: 15px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-
-        header h3 { font-size: 1.1rem; }
-
-        .btn-clear {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-clear:hover { background: rgba(255,255,255,0.3); }
-
-        /* Chat Window */
-        #chat-window {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 15px;
-            position: relative;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-            animation: popIn 0.2s ease-out;
-        }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .message.my {
-            align-self: flex-end;
-            background-color: var(--my-msg-bg);
-            color: white;
-            border-bottom-right-radius: 2px;
-        }
-
-        .message.other {
-            align-self: flex-start;
-            background-color: var(--other-msg-bg);
             color: var(--text-color);
-            border-bottom-left-radius: 2px;
-        }
-
-        .msg-info {
-            font-size: 0.7rem;
-            margin-bottom: 4px;
-            opacity: 0.7;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        /* Stikerlar uchun stil */
-        .sticker-img {
-            width: 100px; /* Stikerni kattalashtirdim */
-            height: 100px;
-            object-fit: contain;
-            display: block;
-            margin-top: 5px;
-        }
-        
-        /* Agar stiker bo'lsa, matn qutisi joyini qisqartirish */
-        .message.sticker-msg {
-            background: transparent !important;
-            box-shadow: none;
-            padding: 0;
-        }
-        
-        /* Footer va Inputlar */
-        footer {
-            padding: 10px;
-            background: white;
-            border-top: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .emoji-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .emoji-btn:hover { transform: scale(1.2); }
-
-        #msg-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            font-size: 1rem;
-        }
-        #msg-input:focus { border-color: var(--primary); }
-
-        .send-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* Stiker Paneli */
-        #sticker-panel {
-            position: absolute;
-            bottom: 60px;
-            left: 0;
-            width: 100%;
-            background: white;
-            padding: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: none; /* Yashirin holatda */
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            z-index: 20;
-            border-top: 1px solid #eee;
-        }
-
-        .sticker-option {
-            cursor: pointer;
-            transition: transform 0.2s;
-            text-align: center;
-        }
-        .sticker-option:hover { transform: scale(1.1); }
-        .sticker-option img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
         }
 
         /* Login Modal */
-        #login-modal {
+        .login-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
-        }
-        
-        .login-content h1 { color: var(--primary); margin-bottom: 20px; }
-        .login-input {
-            padding: 10px; border: 2px solid #ddd; border-radius: 10px;
-            margin-bottom: 20px; font-size: 1.1rem; text-align: center; width: 200px;
-        }
-        .login-btn {
-            padding: 10px 30px; background: var(--primary); color: white;
-            border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .login-box input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Main Chat Container */
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            background: var(--chat-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        @media (min-width: 640px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: var(--border-radius);
+                overflow: hidden;
+            }
+        }
+
+        /* Header */
+        .chat-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .chat-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-group {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+
+        .avatar-group img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+        }
+        
+        .avatar-1 { left: 0; top: 0; z-index: 2; }
+        .avatar-2 { left: 14px; top: 0; z-index: 1; }
+
+        .chat-title h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .chat-title p {
+            font-size: 0.8rem;
+            color: #10b981; /* Green for online */
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: #fafafa;
+            scroll-behavior: smooth;
+        }
+
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            max-width: 80%;
+        }
+
+        .message-row.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.received {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #ddd;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sender-name {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-left: 4px;
+        }
+
+        .message-bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .received .message-bubble {
+            background-color: var(--message-received-bg);
+            color: var(--message-received-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .sent .message-bubble {
+            background-color: var(--message-sent-bg);
+            color: var(--message-sent-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .sent .message-time {
+            color: #e0e7ff; /* lighter blue for text on blue bg */
+        }
+
+        .received .message-time {
+            color: var(--text-light);
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            outline: none;
+            font-size: 0.95rem;
+            background: #f9fafb;
+        }
+
+        .chat-input-area input:focus {
+            background: white;
+            border-color: var(--primary-color);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            margin-left: 2px; /* Visual centering fix */
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            padding: 10px 14px;
+            background-color: var(--message-received-bg);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: none; /* Hidden by default */
+            gap: 4px;
+            align-items: center;
+            width: fit-content;
+            margin-bottom: 1rem;
+            margin-left: 1rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            top: 80px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Login Modal -->
-        <div id="login-modal">
-            <div class="login-content">
-                <h1>Chat Ga Kirish</h1>
-                <input type="text" id="username" class="login-input" placeholder="Ismingiz..." maxlength="12">
-                <br>
-                <button class="login-btn" onclick="startChat()">Kirish 🚀</button>
-            </div>
+    <!-- Login Modal -->
+    <div class="login-overlay" id="loginModal">
+        <div class="login-box">
+            <h2>Chatga Kirish</h2>
+            <p style="margin-bottom: 20px; color: #666;">Iltimos, ismingizni kiriting</p>
+            <input type="text" id="usernameInput" placeholder="Ismingiz (masalan: Ali)" maxlength="15" autocomplete="off">
+            <button class="btn-primary" onclick="joinChat()">Kirish</button>
         </div>
+    </div>
 
+    <!-- Main Chat Application -->
+    <div class="chat-container">
         <!-- Header -->
-        <header>
-            <h3>Chat ✨</h3>
-            <button class="btn-clear" onclick="clearChat()">🗑️ Tozalash</button>
+        <header class="chat-header">
+            <div class="chat-info">
+                <div class="avatar-group">
+                    <!-- Random avatars for "group" look -->
+                    <img src="https://picsum.photos/seed/user1/100/100" class="avatar-1" alt="User 1">
+                    <img src="https://picsum.photos/seed/user2/100/100" class="avatar-2" alt="User 2">
+                </div>
+                <div class="chat-title">
+                    <h3>Umumiy Guruh</h3>
+                    <p><span class="status-dot"></span> 15 a'zo, 3 onlayn</p>
+                </div>
+            </div>
+            <!-- Menu dots (visual only) -->
+            <div style="color: #9ca3af; cursor: pointer;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+            </div>
         </header>
 
-        <!-- Chat Window -->
-        <div id="chat-window">
-            <!-- Xabarlar shu yerga keladi -->
+        <!-- Messages List -->
+        <main class="chat-messages" id="messageList">
+            <!-- Messages will be inserted here by JS -->
+            <div style="text-align: center; color: #9ca3af; font-size: 0.8rem; margin-top: 20px;">
+                Bugun
+            </div>
+        </main>
+
+        <!-- Typing Indicator (Hidden by default) -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
         </div>
 
-        <!-- Stiker Paneli -->
-        <div id="sticker-panel">
-            <!-- Stikerlar JS orqali yuklanadi -->
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <button class="emoji-btn" onclick="toggleStickers()">🙂</button>
-            <input type="text" id="msg-input" placeholder="Xabar yozing..." autocomplete="off">
-            <button class="send-btn" onclick="sendMessage()">➤</button>
+        <!-- Input Area -->
+        <footer class="chat-input-area">
+            <input type="text" id="messageInput" placeholder="Xabar yozish..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                </svg>
+            </button>
         </footer>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">Xabar yuborildi</div>
     </div>
 
     <script>
-        // --- O‘ZGARUVCHILAR ---
-        const chatWindow = document.getElementById('chat-window');
-        const msgInput = document.getElementById('msg-input');
-        const stickerPanel = document.getElementById('sticker-panel');
-        const loginModal = document.getElementById('login-modal');
-        const usernameInput = document.getElementById('username');
+        // --- State Management ---
+        let currentUser = null;
+        const storageKey = 'chat_history_v1';
         
-        let currentUser = '';
-        let messages = [];
-
-        // STIKERLAR RO‘YXATI (Internetdagi bepul stikerlar linklari)
-        const stickers = [
-            "https://cdn-icons-png.flaticon.com/128/742/742751.png",  // Happy
-            "https://cdn-icons-png.flaticon.com/128/742/742928.png",  // Laugh
-            "https://cdn-icons-png.flaticon.com/128/1791/1791330.png", // Love
-            "https://cdn-icons-png.flaticon.com/128/478/478544.png",  // Sad
-            "https://cdn-icons-png.flaticon.com/128/1791/1791333.png", // Angry
-            "https://cdn-icons-png.flaticon.com/128/1039/1039868.png", // Cool
-            "https://cdn-icons-png.flaticon.com/128/744/744922.png",  // Thinking
-            "https://cdn-icons-png.flaticon.com/128/1067/1067566.png"  // Hello
+        // Random bot names and responses for simulation
+        const botNames = ["Aziza", "Jasur", "Sobir", "Malika", "Bot"];
+        const botResponses = [
+            "Assalomu alaykum! Qalay sizlar?",
+            "Juda zo'r gap!",
+            "Rostdanmi? Bu qiziq.",
+            "Hammasi joyida.",
+            "Ha, Roziman.",
+            "Kechirasiz, hozibcha bandman.",
+            "Qachon uchrashamiz?",
+            "Ajoyib!"
         ];
 
-        // --- ASOSIY FUNKSIYALAR ---
-
-        // 1. Dastlabki yuklash
-        window.onload = function() {
-            loadStickers();
-            
-            // Userni tekshirish
-            const savedUser = localStorage.getItem('simple_chat_user');
-            if (savedUser) {
-                currentUser = savedUser;
-                loginModal.style.display = 'none';
-            }
-            
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
             loadMessages();
-        };
-
-        // 2. Kirish (Login)
-        function startChat() {
-            const name = usernameInput.value.trim();
-            if (name === '') return alert("Ism kiriting!");
             
+            // Focus input on load
+            document.getElementById('usernameInput').focus();
+        });
+
+        // --- Login Logic ---
+        function joinChat() {
+            const nameInput = document.getElementById('usernameInput');
+            const name = nameInput.value.trim();
+
+            if (name.length < 2) {
+                showToast("Iltimos, kamida 2 ta harf kiriting");
+                nameInput.style.borderColor = "red";
+                return;
+            }
+
             currentUser = name;
-            localStorage.setItem('simple_chat_user', currentUser);
             
-            loginModal.style.display = 'none';
-            loadMessages(); // Xatlarni yuklash
-            msgInput.focus();
+            // Hide modal
+            const modal = document.getElementById('loginModal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+
+            // Add welcome message system
+            addSystemMessage(`${currentUser} chatga qo'shildi`);
+            document.getElementById('messageInput').focus();
         }
 
-        // 3. Stikerni panelga joylashtirish
-        function loadStickers() {
-            stickerPanel.innerHTML = '';
-            stickers.forEach(url => {
-                const div = document.createElement('div');
-                div.className = 'sticker-option';
-                div.innerHTML = `<img src="${url}" alt="sticker">`;
-                div.onclick = () => sendSticker(url);
-                stickerPanel.appendChild(div);
-            });
-        }
-
-        // 4. Stiker panelini ochish/yopish
-        function toggleStickers() {
-            if (stickerPanel.style.display === 'grid') {
-                stickerPanel.style.display = 'none';
-            } else {
-                stickerPanel.style.display = 'grid';
+        // --- Message Handling ---
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
         }
 
-        // 5. Xabar Yuborish (Matn)
         function sendMessage() {
-            const text = msgInput.value.trim();
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
             if (!text) return;
 
-            const msg = {
-                type: 'text',
-                user: currentUser,
-                content: text,
-                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'})
+            // 1. Create user message object
+            const userMessage = {
+                id: Date.now(),
+                sender: currentUser,
+                text: text,
+                type: 'sent',
+                time: getCurrentTime(),
+                avatar: `https://picsum.photos/seed/${currentUser}/100/100`
             };
 
-            addMessageToStorage(msg);
-            renderMessage(msg);
-            msgInput.value = '';
+            // 2. Add to UI
+            renderMessage(userMessage);
+            saveMessage(userMessage);
+
+            // 3. Clear input
+            input.value = '';
             scrollToBottom();
+
+            // 4. Simulate Bot Reply (Hamma ko'radi effect)
+            simulateBotReply();
         }
 
-        // 6. Stiker Yuborish
-        function sendSticker(url) {
-            const msg = {
-                type: 'sticker',
-                user: currentUser,
-                content: url,
-                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'})
-            };
-
-            addMessageToStorage(msg);
-            renderMessage(msg);
-            toggleStickers(); // Panelni yopish
-            scrollToBottom();
-        }
-
-        // 7. Xabarni xotiraga qo‘shish
-        function addMessageToStorage(msg) {
-            messages.push(msg);
-            // Faqat oxirgi 50 tasini saqlaymiz (xotirani tejash uchun)
-            if (messages.length > 50) messages.shift();
+        // --- Simulation Logic (Fake "Others") ---
+        function simulateBotReply() {
+            const indicator = document.getElementById('typingIndicator');
             
-            localStorage.setItem('simple_chat_data', JSON.stringify(messages));
-        }
+            // Show typing indicator randomly between 0.5s and 1.5s
+            const delayBeforeTyping = Math.random() * 1000 + 500;
 
-        // 8. Xotiradan yuklash
-        function loadMessages() {
-            const savedData = localStorage.getItem('simple_chat_data');
-            if (savedData) {
-                messages = JSON.parse(savedData);
-                chatWindow.innerHTML = ''; // Tozalash
-                messages.forEach(msg => renderMessage(msg));
+            setTimeout(() => {
+                // Only show if user hasn't cleared chat or something weird happened
+                if(!currentUser) return;
+                
+                indicator.style.display = 'flex';
                 scrollToBottom();
-            }
+
+                // Send actual reply after typing
+                const typingDuration = Math.random() * 1500 + 1000;
+
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+
+                    const randomBot = botNames[Math.floor(Math.random() * botNames.length)];
+                    const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+
+                    const botMessage = {
+                        id: Date.now() + 1,
+                        sender: randomBot,
+                        text: randomResponse,
+                        type: 'received',
+                        time: getCurrentTime(),
+                        avatar: `https://picsum.photos/seed/${randomBot}/100/100`
+                    };
+
+                    renderMessage(botMessage);
+                    saveMessage(botMessage);
+                    scrollToBottom();
+
+                }, typingDuration);
+
+            }, delayBeforeTyping);
         }
 
-        // 9. Xabarni ekranda chiqarish
+        // --- Rendering ---
         function renderMessage(msg) {
-            const div = document.createElement('div');
-            // Demoda hamma xabarlar 'my' (o'ng tomonda) ko'rinadi
-            div.className = `message my`;
+            const list = document.getElementById('messageList');
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-row ${msg.type}`;
 
-            if (msg.type === 'sticker') {
-                div.classList.add('sticker-msg');
-                div.innerHTML = `
-                    <div class="msg-info">
-                        <span>${escapeHtml(msg.user)}</span>
-                        <span>${msg.time}</span>
+            // Avatar HTML
+            const avatarHtml = `
+                <div class="message-avatar">
+                    <img src="${msg.avatar}" alt="${msg.sender}">
+                </div>
+            `;
+
+            // Content HTML
+            const contentHtml = `
+                <div class="message-content">
+                    <div class="sender-name">${msg.sender}</div>
+                    <div class="message-bubble">
+                        ${escapeHtml(msg.text)}
+                        <div class="message-time">${msg.time}</div>
                     </div>
-                    <img src="${msg.content}" class="sticker-img">
-                `;
+                </div>
+            `;
+
+            // Layout differs for sent vs received
+            if (msg.type === 'sent') {
+                // For sent messages, usually no avatar is needed or it's on the right
+                // But for this group chat style, let's put avatar on right
+                wrapper.innerHTML = contentHtml + avatarHtml;
             } else {
-                div.innerHTML = `
-                    <div class="msg-info">
-                        <span>${escapeHtml(msg.user)}</span>
-                        <span>${msg.time}</span>
-                    </div>
-                    ${escapeHtml(msg.content)}
-                `;
+                wrapper.innerHTML = avatarHtml + contentHtml;
             }
-            chatWindow.appendChild(div);
+
+            list.appendChild(wrapper);
         }
 
-        // 10. Tarixni tozalash
-        function clearChat() {
-            if(confirm("Barcha xabarlarni o‘chirmoqchimisiz?")) {
-                messages = [];
-                localStorage.removeItem('simple_chat_data');
-                chatWindow.innerHTML = '';
-            }
+        function addSystemMessage(text) {
+            const list = document.getElementById('messageList');
+            const div = document.createElement('div');
+            div.style.textAlign = 'center';
+            div.style.margin = '10px 0';
+            div.style.fontSize = '0.8rem';
+            div.style.color = '#9ca3af';
+            div.textContent = text;
+            list.appendChild(div);
+            scrollToBottom();
+        }
+
+        // --- Utilities ---
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + 
+                   now.getMinutes().toString().padStart(2, '0');
         }
 
         function scrollToBottom() {
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            const list = document.getElementById('messageList');
+            list.scrollTop = list.scrollHeight;
         }
 
         function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            // Basic XSS protection
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        // Enter tugmasi
-        msgInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') sendMessage();
-        });
-        usernameInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') startChat();
-        });
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Storage (Persistence) ---
+        function saveMessage(msg) {
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            history.push(msg);
+            // Keep last 50 messages only
+            if (history.length > 50) history = history.slice(-50);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function loadMessages() {
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            // Clear "Bugun" text except the first one
+            const list = document.getElementById('messageList');
+            // Keep the "Bugun" label, remove others if we were clearing.
+            // But here we just append saved messages.
+            
+            history.forEach(msg => {
+                renderMessage(msg);
+            });
+            if(history.length > 0) {
+                scrollToBottom();
+            }
+        }
 
     </script>
 </body>
