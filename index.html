@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Chat - Doimiy Kirish</title>
+    <style>
+        /* --- CSS Dizayni --- */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-body: #1a1c2c;
+            --bg-chat: #252836;
+            --msg-in: #323646;
+            --text-main: #ffffff;
+            --text-secondary: #aab2c0;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --danger: #ff4757;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        
+        body {
+            background-color: var(--bg-body);
+            background-image: radial-gradient(circle at 10% 20%, rgba(102, 126, 234, 0.2) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 80%, rgba(118, 75, 162, 0.2) 0%, transparent 20%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 950px;
+            height: 92vh;
+            background-color: var(--bg-chat);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        /* Login Modal - Yashirilgan holatda display: none bo'ladi */
+        #login-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(37, 40, 54, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none; /* Boshlang'ichda yashirin, JS orqali ochiladi */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-card {
+            background: linear-gradient(145deg, #2e3242, #252836);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .login-card h1 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            background: #1a1c2c;
+            border: 2px solid #323646;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        
+        .login-input:focus { border-color: #764ba2; }
+
+        .btn-glow {
+            background: var(--primary-gradient);
+            color: white; border: none;
+            width: 100%; padding: 15px;
+            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+
+        /* Header */
+        header {
+            padding: 15px 30px;
+            background: rgba(37, 40, 54, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px; border-radius: 30px;
+            color: var(--text-secondary);
+        }
+        
+        .user-badge strong { color: white; }
+
+        .btn-icon {
+            background: none; border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem; cursor: pointer;
+            margin-left: 15px; transition: 0.2s;
+        }
+
+        .btn-icon.danger:hover { color: var(--danger); transform: scale(1.1); }
+        .btn-icon:hover { color: #ff6b6b; transform: scale(1.1); }
+
+        /* Chat Area */
+        #chat-area {
+            flex: 1; padding: 20px;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        #chat-area::-webkit-scrollbar { width: 6px; }
+        #chat-area::-webkit-scrollbar-thumb { background: #323646; border-radius: 10px; }
+
+        /* Messages */
+        .message-row { display: flex; width: 100%; }
+        .message-row.me { justify-content: flex-end; }
+        .message-row.other { justify-content: flex-start; }
+
+        .bubble {
+            max-width: 70%; padding: 10px 16px;
+            border-radius: 18px; position: relative;
+            color: white; font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .bubble.me {
+            background: var(--primary-gradient);
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .bubble.other {
+            background: var(--msg-in);
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .msg-info { font-size: 0.75rem; opacity: 0.7; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px;}
+        .bubble.me .msg-sender { color: rgba(255,255,255,0.9); }
+        .bubble.other .msg-sender { color: #aab2c0; }
+
+        /* Footer */
+        footer {
+            padding: 15px 30px;
+            background: #252836;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; gap: 10px; align-items: center;
+        }
+
+        #msg-input {
+            flex: 1; padding: 12px 20px;
+            background: #1a1c2c; border: 1px solid #323646;
+            border-radius: 25px; color: white; outline: none;
+        }
+        
+        #msg-input:focus { border-color: #667eea; }
+
+        .btn-send {
+            background: #1a1c2c; color: #667eea;
+            border: 1px solid #323646;
+            width: 45px; height: 45px;
+            border-radius: 50%; cursor: pointer;
+            font-size: 1.2rem; display: flex;
+            align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+        
+        .btn-send:hover { background: #667eea; color: white; }
+
+        .empty-placeholder {
+            text-align: center; color: #555; margin-top: 50px;
+        }
+
+        /* Delete Animation */
+        .delete-anim {
+            animation: scaleOut 0.3s forwards;
+        }
+
+        @keyframes scaleOut {
+            to { transform: scale(0); opacity: 0; margin: 0; padding: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Login -->
+        <!-- CSSda display: none deb belgilangan, faqat foydalanuvchi bo‘lmasa ko‘rinadi -->
+        <div id="login-overlay">
+            <div class="login-card">
+                <h1>World Chat</h1>
+                <input type="text" id="username-field" class="login-input" placeholder="Ismingizni kiriting..." maxlength="10">
+                <button class="btn-glow" onclick="startChat()">Kirish 🚀</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <div class="user-badge">
+                Siz: <strong id="display-name">Guest</strong>
+            </div>
+            <div>
+                <!-- Oxirgi xabarni o‘chirish -->
+                <button class="btn-icon" onclick="deleteMyLastMessage()" title="Oxirgi xabarni o‘chirish">
+                    🗑️
+                </button>
+                <!-- HAMMASINI O‘CHIRISH -->
+                <button class="btn-icon danger" onclick="deleteAllMyMessages()" title="Barcha xabarlarimni o‘chirish">
+                    ⚠️
+                </button>
+                <!-- CHIQISH TUGMASI -->
+                <button class="btn-icon" onclick="logout()" title="Hisobdan chiqish">
+                    🚪
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div id="chat-area"></div>
+
+        <!-- Footer -->
+        <footer>
+            <input type="text" id="msg-input" placeholder="Xabar yozing..." autocomplete="off">
+            <button class="btn-send" onclick="sendMessage()">➤</button>
+        </footer>
+    </div>
+
+    <script>
+        // --- KOD ---
+        const chatArea = document.getElementById('chat-area');
+        const msgInput = document.getElementById('msg-input');
+        const nameField = document.getElementById('username-field');
+        const displayName = document.getElementById('display-name');
+        const loginOverlay = document.getElementById('login-overlay');
+        
+        let currentUser = '';
+        let messages = [];
+
+        // --- 1. ILK YUKLANGANDA ISHLAYDIGAN FUNKSIYA ---
+        window.addEventListener('load', () => {
+            checkUserSession();
+        });
+
+        function checkUserSession() {
+            const savedUser = localStorage.getItem('wc_user');
+            
+            // AGAR USER MAVJUD BO'LSA, LOGIN KO'RSATMAYMIZ
+            if (savedUser) {
+                currentUser = savedUser;
+                displayName.textContent = currentUser;
+                // Login oynasi yashirin (CSSda none)
+                loginOverlay.style.display = 'none';
+                // Xabalarni yuklaymiz
+                loadMessages();
+                msgInput.focus();
+            } else {
+                // AGAR USER YO'Q BO'LSA, LOGIN OYNASINI KO'RSATAMIZ
+                loginOverlay.style.display = 'flex';
+            }
+        }
+
+        // 2. Kirish (Login)
+        function startChat() {
+            const name = nameField.value.trim();
+            if (!name) return alert("Ism kiritish shart!");
+            
+            currentUser = name;
+            // Userni xotiraga yozamiz (KEYPOINT)
+            localStorage.setItem('wc_user', currentUser);
+            
+            // Oynani yopamiz
+            loginOverlay.style.display = 'none';
+            displayName.textContent = currentUser;
+            
+            loadMessages();
+            msgInput.focus();
+        }
+
+        // 3. Yuborish
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text) return;
+
+            const msg = {
+                id: Date.now(),
+                user: currentUser,
+                text: text,
+                time: new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'}),
+                isMe: true
+            };
+
+            messages.push(msg);
+            saveAndRender(msg);
+            msgInput.value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // 4. Saqlash va Chiqarish
+        function saveAndRender(newMsg = null) {
+            localStorage.setItem('wc_msgs', JSON.stringify(messages));
+            
+            if (newMsg) {
+                const row = document.createElement('div');
+                row.className = 'message-row me'; 
+                row.id = `msg-${newMsg.id}`;
+                
+                row.innerHTML = `
+                    <div class="bubble me">
+                        <div class="msg-info">
+                            <span class="msg-sender">${escapeHtml(newMsg.user)}</span>
+                            <span>${newMsg.time}</span>
+                        </div>
+                        ${escapeHtml(newMsg.text)}
+                    </div>
+                `;
+                chatArea.appendChild(row);
+            }
+        }
+
+        // 5. YUKLASH
+        function loadMessages() {
+            const savedMsgs = localStorage.getItem('wc_msgs');
+            if (savedMsgs) {
+                messages = JSON.parse(savedMsgs);
+                chatArea.innerHTML = '';
+                
+                if (messages.length === 0) {
+                    chatArea.innerHTML = '<div class="empty-placeholder">Xabarlar yo‘q</div>';
+                } else {
+                    messages.forEach(msg => {
+                        const row = document.createElement('div');
+                        row.className = 'message-row me';
+                        row.id = `msg-${msg.id}`;
+                        row.innerHTML = `
+                            <div class="bubble me">
+                                <div class="msg-info">
+                                    <span class="msg-sender">${escapeHtml(msg.user)}</span>
+                                    <span>${msg.time}</span>
+                                </div>
+                                ${escapeHtml(msg.text)}
+                            </div>
+                        `;
+                        chatArea.appendChild(row);
+                    });
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }
+            }
+        }
+
+        // 6. OXIRGI XABARNI O‘CHIRISH
+        function deleteMyLastMessage() {
+            if (messages.length === 0) return alert("Xabar yo‘q!");
+
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (messages[i].user === currentUser) {
+                    removeMessageAndRender(i);
+                    return;
+                }
+            }
+            alert("Sizning xabaringiz yo‘q!");
+        }
+
+        // 7. HAMMASINI O‘CHIRISH
+        function deleteAllMyMessages() {
+            if (messages.length === 0) return;
+
+            if (confirm("Haqiqatan ham o‘zingizning barcha xabalaringizni o‘chirmoqchimisiz?")) {
+                const originalCount = messages.length;
+                
+                // Faqat o'zidan bo'lmaganlarini qoldiramiz
+                messages = messages.filter(msg => msg.user !== currentUser);
+
+                if (messages.length === originalCount) {
+                    alert("O‘chirish uchun xabar topilmadi.");
+                } else {
+                    localStorage.setItem('wc_msgs', JSON.stringify(messages));
+                    loadMessages(); 
+                    alert("Barcha xabaringiz o‘chirildi.");
+                }
+            }
+        }
+
+        function removeMessageAndRender(index) {
+            const msg = messages[index];
+            messages.splice(index, 1);
+            localStorage.setItem('wc_msgs', JSON.stringify(messages));
+            
+            const el = document.getElementById(`msg-${msg.id}`);
+            if (el) {
+                el.classList.add('delete-anim');
+                setTimeout(() => el.remove(), 300);
+            }
+        }
+
+        // 8. CHIQISH (Log Out) - Bu kerak bo‘lsa, ismni o‘chiradi
+        function logout() {
+            if(confirm("Hisobdan chiqmoqchimisiz?")) {
+                localStorage.removeItem('wc_user');
+                location.reload();
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Event Listeners
+        msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        nameField.addEventListener('keypress', (e) => { if(e.key === 'Enter') startChat(); });
+
+    </script>
+</body>
+</html>
