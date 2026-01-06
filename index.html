@@ -3,666 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umumiy Chat - Online Muloqot</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Guruh Chat - Real-time simulyatsiya</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f3f4f6;
-            --chat-bg: #ffffff;
+            --primary-color: #2563eb; /* Standart ko'k */
+            --bg-color: #ffffff;      /* Oq fon */
             --text-color: #1f2937;
             --text-light: #6b7280;
-            --message-sent-bg: #4f46e5;
-            --message-sent-text: #ffffff;
-            --message-received-bg: #f3f4f6;
-            --message-received-text: #1f2937;
-            --border-radius: 16px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --msg-sent-bg: #2563eb;
+            --msg-sent-text: #ffffff;
+            --msg-received-bg: #f3f4f6;
+            --msg-received-text: #1f2937;
+            --border-color: #e5e7eb;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background-color: #eef2f6; /* Sayt tashqi fon */
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: var(--text-color);
+            overflow: hidden;
         }
 
-        /* Login Modal */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Chat Container */
+        .chat-wrapper {
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .login-box {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-box h2 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .login-box input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        /* Main Chat Container */
-        .chat-container {
-            width: 100%;
-            max-width: 600px;
-            height: 100vh;
-            background: var(--chat-bg);
+            max-width: 500px;
+            max-height: 800px;
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: var(--shadow);
-        }
-
-        @media (min-width: 640px) {
-            .chat-container {
-                height: 90vh;
-                border-radius: var(--border-radius);
-                overflow: hidden;
-            }
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
         }
 
         /* Header */
-        .chat-header {
-            padding: 1rem;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
+        header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            z-index: 10;
-        }
-
-        .chat-info {
-            display: flex;
             align-items: center;
-            gap: 12px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
         }
 
-        .avatar-group {
-            position: relative;
-            width: 40px;
-            height: 40px;
-        }
+        .header-title h2 { font-size: 1.1rem; color: var(--text-color); }
+        .header-title p { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
 
-        .avatar-group img {
-            width: 36px;
-            height: 36px;
+        .header-actions { display: flex; gap: 10px; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 5px;
             border-radius: 50%;
-            border: 2px solid white;
-            position: absolute;
+            transition: background 0.2s;
         }
-        
-        .avatar-1 { left: 0; top: 0; z-index: 2; }
-        .avatar-2 { left: 14px; top: 0; z-index: 1; }
+        .icon-btn:hover { background-color: #f3f4f6; }
 
-        .chat-title h3 {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .chat-title p {
-            font-size: 0.8rem;
-            color: #10b981; /* Green for online */
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-        }
-
-        /* Chat Messages Area */
-        .chat-messages {
+        /* Messages Area */
+        .messages-area {
             flex: 1;
-            padding: 1rem;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            background-color: #fafafa;
+            gap: 15px;
             scroll-behavior: smooth;
         }
 
-        .message-row {
+        .message {
             display: flex;
             align-items: flex-end;
-            gap: 8px;
-            max-width: 80%;
+            max-width: 75%;
+            position: relative;
+            animation: fadeIn 0.3s ease;
         }
 
-        .message-row.sent {
+        .message.mine {
             align-self: flex-end;
             flex-direction: row-reverse;
         }
 
-        .message-row.received {
+        .message.theirs {
             align-self: flex-start;
         }
 
-        .message-avatar {
+        .avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background-color: #ddd;
-            overflow: hidden;
+            background: #ddd;
             flex-shrink: 0;
+            overflow: hidden;
         }
-        
-        .message-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .message-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .sender-name {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-left: 4px;
-        }
-
-        .message-bubble {
+        .bubble {
             padding: 10px 14px;
-            border-radius: 18px;
+            border-radius: 16px;
             font-size: 0.95rem;
             line-height: 1.4;
             position: relative;
             word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .received .message-bubble {
-            background-color: var(--message-received-bg);
-            color: var(--message-received-text);
-            border-bottom-left-radius: 4px;
-        }
-
-        .sent .message-bubble {
-            background-color: var(--message-sent-bg);
-            color: var(--message-sent-text);
+        .message.mine .bubble {
+            background-color: var(--msg-sent-bg);
+            color: var(--msg-sent-text);
             border-bottom-right-radius: 4px;
+            margin-right: 8px;
         }
 
-        .message-time {
+        .message.theirs .bubble {
+            background-color: var(--msg-received-bg);
+            color: var(--msg-received-text);
+            border-bottom-left-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .meta {
             font-size: 0.7rem;
+            margin-top: 4px;
             opacity: 0.7;
             text-align: right;
-            margin-top: 4px;
-        }
-
-        .sent .message-time {
-            color: #e0e7ff; /* lighter blue for text on blue bg */
-        }
-
-        .received .message-time {
-            color: var(--text-light);
-        }
-
-        /* Input Area */
-        .chat-input-area {
-            padding: 1rem;
-            background: white;
-            border-top: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.5;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0 2px;
+        }
+        .delete-btn:hover { opacity: 1; color: #ff4d4d; }
+
+        /* Input Area */
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
             gap: 10px;
+            background: rgba(255,255,255,0.9);
         }
 
-        .chat-input-area input {
+        .input-area input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 24px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
             outline: none;
             font-size: 0.95rem;
             background: #f9fafb;
         }
 
-        .chat-input-area input:focus {
-            background: white;
-            border-color: var(--primary-color);
-        }
+        .input-area input:focus { border-color: var(--primary-color); background: #fff; }
 
         .send-btn {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background-color: var(--primary-color);
             border: none;
+            background-color: var(--primary-color);
             color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        .send-btn:active { transform: scale(0.95); }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .send-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-            margin-left: 2px; /* Visual centering fix */
-        }
-
-        /* Typing indicator */
-        .typing-indicator {
-            padding: 10px 14px;
-            background-color: var(--message-received-bg);
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            display: none; /* Hidden by default */
-            gap: 4px;
-            align-items: center;
-            width: fit-content;
-            margin-bottom: 1rem;
-            margin-left: 1rem;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #9ca3af;
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f2937;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 2000;
+            transition: opacity 0.3s;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 300px;
+            text-align: center;
         }
 
-        .toast.show {
-            opacity: 1;
-            top: 80px;
+        .color-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .color-circle {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-circle.selected { border-color: #000; }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #ddd; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
     <!-- Login Modal -->
-    <div class="login-overlay" id="loginModal">
-        <div class="login-box">
+    <div class="modal active" id="loginModal">
+        <div class="modal-content">
             <h2>Chatga Kirish</h2>
-            <p style="margin-bottom: 20px; color: #666;">Iltimos, ismingizni kiriting</p>
-            <input type="text" id="usernameInput" placeholder="Ismingiz (masalan: Ali)" maxlength="15" autocomplete="off">
-            <button class="btn-primary" onclick="joinChat()">Kirish</button>
+            <p style="margin: 10px 0; color: #666;">Ismingizni kiriting</p>
+            <input type="text" id="usernameInput" placeholder="Ism (masalan: Ali)" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+            <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="login()">Kirish</button>
         </div>
     </div>
 
-    <!-- Main Chat Application -->
-    <div class="chat-container">
-        <!-- Header -->
-        <header class="chat-header">
-            <div class="chat-info">
-                <div class="avatar-group">
-                    <!-- Random avatars for "group" look -->
-                    <img src="https://picsum.photos/seed/user1/100/100" class="avatar-1" alt="User 1">
-                    <img src="https://picsum.photos/seed/user2/100/100" class="avatar-2" alt="User 2">
-                </div>
-                <div class="chat-title">
-                    <h3>Umumiy Guruh</h3>
-                    <p><span class="status-dot"></span> 15 a'zo, 3 onlayn</p>
-                </div>
+    <!-- Settings Modal (Fon) -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3>Fon rangini tanlang</h3>
+            <div class="color-options">
+                <div class="color-circle selected" style="background:#ffffff;" onclick="changeBg('#ffffff', this)"></div>
+                <div class="color-circle" style="background:#fff1f2;" onclick="changeBg('#fff1f2', this)"></div>
+                <div class="color-circle" style="background:#ecfdf5;" onclick="changeBg('#ecfdf5', this)"></div>
+                <div class="color-circle" style="background:#f0fdf4;" onclick="changeBg('#f0fdf4', this)"></div>
+                <div class="color-circle" style="background:#1e1e1e;" onclick="changeBg('#1e1e1e', this)"></div> <!-- Dark mode demo -->
             </div>
-            <!-- Menu dots (visual only) -->
-            <div style="color: #9ca3af; cursor: pointer;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="12" cy="5" r="1"></circle>
-                    <circle cx="12" cy="19" r="1"></circle>
-                </svg>
+            <button class="btn btn-outline" onclick="toggleSettings('settingsModal')">Yopish</button>
+        </div>
+    </div>
+
+    <div class="chat-wrapper" id="chatWrapper">
+        <header>
+            <div class="header-title">
+                <h2 id="chatTitle">Guruh Chat</h2>
+                <p id="userStatus">Odamlar: ...</p>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleSettings('settingsModal')" title="Fonni o'zgartirish">
+                    <!-- Palette Icon -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                    </svg>
+                </button>
+                <button class="icon-btn" onclick="logout()" title="Chiqish">
+                    <!-- Logout Icon -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
             </div>
         </header>
 
-        <!-- Messages List -->
-        <main class="chat-messages" id="messageList">
-            <!-- Messages will be inserted here by JS -->
-            <div style="text-align: center; color: #9ca3af; font-size: 0.8rem; margin-top: 20px;">
-                Bugun
-            </div>
+        <main class="messages-area" id="messagesList">
+            <!-- Messages go here -->
+            <div style="text-align:center; color:#999; font-size:0.8rem; margin-top:10px;">Suhbat boshlandi</div>
         </main>
 
-        <!-- Typing Indicator (Hidden by default) -->
-        <div class="typing-indicator" id="typingIndicator">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
-
-        <!-- Input Area -->
-        <footer class="chat-input-area">
-            <input type="text" id="messageInput" placeholder="Xabar yozish..." onkeypress="handleEnter(event)">
+        <footer class="input-area">
+            <input type="text" id="msgInput" placeholder="Xabar yozing..." onkeypress="handleEnter(event)">
             <button class="send-btn" onclick="sendMessage()">
-                <svg viewBox="0 0 24 24">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
             </button>
         </footer>
-
-        <!-- Toast Notification -->
-        <div class="toast" id="toast">Xabar yuborildi</div>
     </div>
 
     <script>
-        // --- State Management ---
+        // --- Variables ---
         let currentUser = null;
-        const storageKey = 'chat_history_v1';
+        const STORAGE_KEY = 'real_chat_v2';
         
-        // Random bot names and responses for simulation
-        const botNames = ["Aziza", "Jasur", "Sobir", "Malika", "Bot"];
-        const botResponses = [
-            "Assalomu alaykum! Qalay sizlar?",
-            "Juda zo'r gap!",
-            "Rostdanmi? Bu qiziq.",
-            "Hammasi joyida.",
-            "Ha, Roziman.",
-            "Kechirasiz, hozibcha bandman.",
-            "Qachon uchrashamiz?",
-            "Ajoyib!"
-        ];
-
         // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadMessages();
-            
-            // Focus input on load
-            document.getElementById('usernameInput').focus();
-        });
+        window.onload = () => {
+            loadSettings();
+            checkLogin();
+            renderMessages();
+        };
 
-        // --- Login Logic ---
-        function joinChat() {
-            const nameInput = document.getElementById('usernameInput');
-            const name = nameInput.value.trim();
-
+        // --- Auth Logic ---
+        function login() {
+            const input = document.getElementById('usernameInput');
+            const name = input.value.trim();
             if (name.length < 2) {
-                showToast("Iltimos, kamida 2 ta harf kiriting");
-                nameInput.style.borderColor = "red";
+                alert("Iltimos kamida 2 ta harf kiriting");
                 return;
             }
-
             currentUser = name;
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('userStatus').innerText = `${currentUser} faol`;
             
-            // Hide modal
-            const modal = document.getElementById('loginModal');
-            modal.style.opacity = '0';
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-
-            // Add welcome message system
-            addSystemMessage(`${currentUser} chatga qo'shildi`);
-            document.getElementById('messageInput').focus();
+            // Xabarlarni qayta yuklash (agar yangi odam kirsagina)
+            renderMessages();
+            
+            // "Kirgan"lik xabarini yozish (ixtiyoriy, chunki server yo'q shunchaki vizual)
+            // addSystemMessage(`${currentUser} chatga kirdi`); 
         }
 
-        // --- Message Handling ---
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('messagesList').innerHTML = '<div style="text-align:center; color:#999; font-size:0.8rem; margin-top:10px;">Suhbat boshlandi</div>';
+        }
+
+        function checkLogin() {
+            // Bu yerda sessiyani tekshirish mumkin, hozircha oddiy qoldiramiz
+        }
+
+        // --- Messaging Logic ---
         function handleEnter(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+            if (e.key === 'Enter') sendMessage();
         }
 
         function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
+            if (!currentUser) return;
 
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            
             if (!text) return;
 
-            // 1. Create user message object
-            const userMessage = {
+            const newMessage = {
                 id: Date.now(),
                 sender: currentUser,
                 text: text,
-                type: 'sent',
-                time: getCurrentTime(),
-                avatar: `https://picsum.photos/seed/${currentUser}/100/100`
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                avatar: `https://picsum.photos/seed/${currentUser}/50/50`
             };
 
-            // 2. Add to UI
-            renderMessage(userMessage);
-            saveMessage(userMessage);
-
-            // 3. Clear input
+            saveMessage(newMessage);
+            appendMessageToUI(newMessage);
+            
             input.value = '';
             scrollToBottom();
-
-            // 4. Simulate Bot Reply (Hamma ko'radi effect)
-            simulateBotReply();
         }
 
-        // --- Simulation Logic (Fake "Others") ---
-        function simulateBotReply() {
-            const indicator = document.getElementById('typingIndicator');
-            
-            // Show typing indicator randomly between 0.5s and 1.5s
-            const delayBeforeTyping = Math.random() * 1000 + 500;
-
-            setTimeout(() => {
-                // Only show if user hasn't cleared chat or something weird happened
-                if(!currentUser) return;
-                
-                indicator.style.display = 'flex';
-                scrollToBottom();
-
-                // Send actual reply after typing
-                const typingDuration = Math.random() * 1500 + 1000;
-
-                setTimeout(() => {
-                    indicator.style.display = 'none';
-
-                    const randomBot = botNames[Math.floor(Math.random() * botNames.length)];
-                    const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-
-                    const botMessage = {
-                        id: Date.now() + 1,
-                        sender: randomBot,
-                        text: randomResponse,
-                        type: 'received',
-                        time: getCurrentTime(),
-                        avatar: `https://picsum.photos/seed/${randomBot}/100/100`
-                    };
-
-                    renderMessage(botMessage);
-                    saveMessage(botMessage);
-                    scrollToBottom();
-
-                }, typingDuration);
-
-            }, delayBeforeTyping);
+        function saveMessage(msg) {
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            history.push(msg);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         }
 
-        // --- Rendering ---
-        function renderMessage(msg) {
-            const list = document.getElementById('messageList');
+        function deleteMessage(id) {
+            if(!confirm("Bu xabarni o'chirmoqchimisiz?")) return;
             
-            const wrapper = document.createElement('div');
-            wrapper.className = `message-row ${msg.type}`;
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            history = history.filter(msg => msg.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+            
+            renderMessages(); // Qayta chizish
+        }
 
-            // Avatar HTML
+        // --- UI Rendering ---
+        function renderMessages() {
+            const list = document.getElementById('messagesList');
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            // Faqat "Suhbat boshlandi" matnini qoldirib, qolganini tozalash
+            list.innerHTML = '<div style="text-align:center; color:#999; font-size:0.8rem; margin-top:10px;">Suhbat boshlandi</div>';
+
+            history.forEach(msg => {
+                appendMessageToUI(msg, false); // false = scroll qilmaymiz
+            });
+            
+            scrollToBottom();
+        }
+
+        function appendMessageToUI(msg, shouldScroll = true) {
+            const list = document.getElementById('messagesList');
+            
+            const isMine = (msg.sender === currentUser);
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'mine' : 'theirs'}`;
+
             const avatarHtml = `
-                <div class="message-avatar">
+                <div class="avatar">
                     <img src="${msg.avatar}" alt="${msg.sender}">
                 </div>
             `;
 
-            // Content HTML
-            const contentHtml = `
-                <div class="message-content">
-                    <div class="sender-name">${msg.sender}</div>
-                    <div class="message-bubble">
-                        ${escapeHtml(msg.text)}
-                        <div class="message-time">${msg.time}</div>
+            const deleteHtml = `<button class="delete-btn" onclick="deleteMessage(${msg.id})">&times;</button>`;
+
+            div.innerHTML = `
+                ${avatarHtml}
+                <div class="bubble">
+                    <div style="font-weight:600; font-size:0.8rem; margin-bottom:2px; color:${isMine ? 'rgba(255,255,255,0.8)' : '#666'}">${msg.sender}</div>
+                    ${escapeHtml(msg.text)}
+                    <div class="meta">
+                        ${msg.time}
+                        ${deleteHtml}
                     </div>
                 </div>
             `;
-
-            // Layout differs for sent vs received
-            if (msg.type === 'sent') {
-                // For sent messages, usually no avatar is needed or it's on the right
-                // But for this group chat style, let's put avatar on right
-                wrapper.innerHTML = contentHtml + avatarHtml;
-            } else {
-                wrapper.innerHTML = avatarHtml + contentHtml;
-            }
-
-            list.appendChild(wrapper);
+            
+            list.appendChild(div);
+            if(shouldScroll) scrollToBottom();
         }
 
-        function addSystemMessage(text) {
-            const list = document.getElementById('messageList');
-            const div = document.createElement('div');
-            div.style.textAlign = 'center';
-            div.style.margin = '10px 0';
-            div.style.fontSize = '0.8rem';
-            div.style.color = '#9ca3af';
-            div.textContent = text;
-            list.appendChild(div);
-            scrollToBottom();
+        // --- Settings & Theme ---
+        function toggleSettings(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            } else {
+                modal.classList.add('active');
+            }
+        }
+
+        function changeBg(color, el) {
+            const wrapper = document.getElementById('chatWrapper');
+            wrapper.style.backgroundColor = color;
+            
+            // Qorong'i fon uchun matn rangini o'zgartirish
+            if(color === '#1e1e1e') {
+                document.documentElement.style.setProperty('--msg-received-bg', '#333');
+                document.documentElement.style.setProperty('--msg-received-text', '#fff');
+                document.documentElement.style.setProperty('--text-color', '#fff');
+            } else {
+                document.documentElement.style.setProperty('--msg-received-bg', '#f3f4f6');
+                document.documentElement.style.setProperty('--msg-received-text', '#1f2937');
+                document.documentElement.style.setProperty('--text-color', '#1f2937');
+            }
+
+            // Visual feedback
+            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Saqlash (ixtiyoriy)
+            localStorage.setItem('chat_bg_color', color);
+        }
+
+        function loadSettings() {
+            const savedColor = localStorage.getItem('chat_bg_color');
+            if (savedColor) {
+                // Rangni o'zgartirish funksiyasini chaqirish (elementni topish qiyin bo'lishi mumkin shuning uchun oddiy qilib qo'yamiz)
+                document.getElementById('chatWrapper').style.backgroundColor = savedColor;
+            }
         }
 
         // --- Utilities ---
-        function getCurrentTime() {
-            const now = new Date();
-            return now.getHours().toString().padStart(2, '0') + ':' + 
-                   now.getMinutes().toString().padStart(2, '0');
-        }
-
         function scrollToBottom() {
-            const list = document.getElementById('messageList');
+            const list = document.getElementById('messagesList');
             list.scrollTop = list.scrollHeight;
         }
 
         function escapeHtml(text) {
-            // Basic XSS protection
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // --- Storage (Persistence) ---
-        function saveMessage(msg) {
-            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            history.push(msg);
-            // Keep last 50 messages only
-            if (history.length > 50) history = history.slice(-50);
-            localStorage.setItem(storageKey, JSON.stringify(history));
-        }
-
-        function loadMessages() {
-            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            // Clear "Bugun" text except the first one
-            const list = document.getElementById('messageList');
-            // Keep the "Bugun" label, remove others if we were clearing.
-            // But here we just append saved messages.
-            
-            history.forEach(msg => {
-                renderMessage(msg);
-            });
-            if(history.length > 0) {
-                scrollToBottom();
-            }
-        }
-
     </script>
 </body>
 </html>
