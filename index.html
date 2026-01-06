@@ -3,89 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samir Global Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Samir Stable Chat</title>
     <style>
-        body {
-            margin: 0;
-            background: #080710;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: sans-serif;
-            overflow: hidden;
-        }
-
-        /* Orqa fondagi chiroyli shakllar */
-        .background { width: 430px; height: 520px; position: absolute; }
-        .shape { height: 200px; width: 200px; position: absolute; border-radius: 50%; }
-        .shape:first-child { background: linear-gradient(#1845ad, #23a2f6); left: -80px; top: -80px; }
-        .shape:last-child { background: linear-gradient(to right, #ff512f, #f09819); right: -80px; bottom: -80px; }
-
+        body { margin: 0; background: #080710; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
         .chat-container {
-            width: 95%;
-            max-width: 400px;
+            width: 400px;
             height: 85vh;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 25px;
-            z-index: 10;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
             position: relative;
         }
-
-        header {
-            padding: 15px;
-            text-align: center;
+        /* Chat yuklanguncha ko'rinadigan fon */
+        #chat_loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1;
         }
-
-        /* CHATBRO UCHUN MAXSUS JOY */
-        #chatbro_target {
-            width: 100%;
-            height: calc(100% - 60px); /* Headerdan qolgan hamma joy */
-            position: relative;
-        }
+        #chat_area { width: 100%; height: 100%; position: relative; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div class="background">
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
+<div class="chat-container">
+    <div id="chat_loading">Yuklanmoqda...</div>
+    <div id="chat_area"></div>
+</div>
 
-    <div class="chat-container">
-        <header>
-            <h2><i class="fas fa-comments"></i> SAMIR LIVE</h2>
-        </header>
-        <div id="chatbro_target"></div>
-    </div>
+<script>
+    function loadChat() {
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'https://www.chatbro.com/embed.js';
+        s.onload = function() {
+            document.getElementById('chat_loading').style.display = 'none';
+            Chatbro.init({
+                encodedChatId: "59Adc",
+                containerDivId: "chat_area",
+                chatHeight: '100%',
+                chatWidth: '100%',
+                displayHeader: false,
+                isAlwaysOpen: true,
+                isFixed: false
+            });
+        };
+        document.body.appendChild(s);
+    }
+    window.onload = loadChat;
+</script>
 
-    <script id="chatbroScript">
-        function ChatbroLoader(btns, onload) {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.async = true;
-            s.src = 'https://www.chatbro.com/embed.js';
-            s.onload = function() {
-                Chatbro.init({
-                    encodedChatId: "59Adc",
-                    containerDivId: "chatbro_target",
-                    chatHeight: '100%',
-                    chatWidth: '100%',
-                    displayHeader: false,
-                    isAlwaysOpen: true,
-                    // BU YERDA FIXED NI TRUE QILAMIZ VA JOYINI O'ZIMIZ BELGILAYMIZ
-                    isFixed: false,
-                });
-            };
-            var x = document.getElementsByTagName('script')[0];
-            x.parentNode.insertBefore(s, x);
-        }
-        ChatbroLoader();
-    </script>
 </body>
 </html>
